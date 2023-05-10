@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myfile.databinding.ActivityMainBinding
 import com.example.myfile.databinding.ItemFileBinding
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -48,7 +49,9 @@ class FileAdapter(private val actionListener: FileActionListener
             holder.itemView.tag = file
             nameFile.text = file?.name
             val lastModified = Date(file!!.lastModified())
-            dateCreateFile.text = lastModified.toString()
+            val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm")
+            val answer: String = formatter.format(lastModified)
+            dateCreateFile.text = answer.toString()
             buttonShare.setImageResource(R.drawable.icon_share)
             sizeFile.text = "${ file.length() / (1024) }" + " kb"
 
@@ -61,7 +64,7 @@ class FileAdapter(private val actionListener: FileActionListener
             when (ext) {
                 "apk" ->
                     photoImageView.setImageResource(R.drawable.icon_apk)
-                "png", "jpg", "jpeg"
+                "png", "jpg", "jpeg", "JPG"
                 ->
                     photoImageView.setImageResource(R.drawable.icon_image)
                 "txt" ->

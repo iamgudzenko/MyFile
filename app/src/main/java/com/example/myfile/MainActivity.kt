@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity(), IGetFileView {
         when(ext) {
             "png", "jpg", "jpeg"
             -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
+
         }
 
         openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
