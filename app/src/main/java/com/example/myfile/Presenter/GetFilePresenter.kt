@@ -13,7 +13,6 @@ class GetFilePresenter(val fileView: IGetFileView) : IGetFilePresenter {
         Log.w("Files", "Path: $path")
         val directory = File(path)
         val files = directory.listFiles()
-
         if(files != null) {
             for (i in files.indices) {
                 fileView.getFileView(files[i])

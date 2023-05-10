@@ -71,7 +71,7 @@ class FileAdapter(private val actionListener: FileActionListener
                 "mp3" ->
                     photoImageView.setImageResource(R.drawable.icon_mp)
                 "" -> {
-                    var count = file.listFiles().size
+                    var count = file.listFiles().size ?: 0
                     photoImageView.setImageResource(R.drawable.icon_folder)
                     sizeFile.text = "эл-ов:" + count.toString()
                 }

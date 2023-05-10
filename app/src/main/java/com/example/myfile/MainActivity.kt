@@ -2,10 +2,8 @@ package com.example.myfile
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -49,18 +47,9 @@ class MainActivity : AppCompatActivity(), IGetFileView {
                     fileList.clear()
                     binding.recyclerViewFile.removeAllViews()
                     path = Environment.getExternalStorageDirectory().toString() + "/${file.name}"
-                    getFilePresenter.getFileSLoading(file.path)
+                    getFilePresenter.getFileSLoading(file.absolutePath)
                 } else {
-//                    val URI: Uri = FileProvider.getUriForFile(
-//                        this@MainActivity,
-//                        BuildConfig.APPLICATION_ID + ".provider",
-//                        file
-//                    )
-//                    Log.w("URI", URI.toString())
-//                    val intent =
-//                        Intent(Intent.ACTION_VIEW, URI)
-//                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                    startActivity(intent)
+
                     openFile(file)
                 }
             }
@@ -70,7 +59,7 @@ class MainActivity : AppCompatActivity(), IGetFileView {
             }
 
         })
-        getFilePresenter.getFileSLoading(Environment.getExternalStorageDirectory().toString())
+        getFilePresenter.getFileSLoading(Environment.getExternalStorageDirectory().path.toString())
 
         binding.buttonBack.setOnClickListener {
             fileList.clear()
@@ -86,22 +75,40 @@ class MainActivity : AppCompatActivity(), IGetFileView {
 
         }
     }
-    @SuppressLint("IntentReset")
+
     fun openFile(file:File) {
-        val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.type = "*/*"
-        startActivity(intent)
+        val contentUri = FileProvider.getUriForFile(
+            this,
+            this.applicationContext.packageName + ".provider",
+            file
+        )
+        val openFileIntent = Intent(Intent.ACTION_VIEW)
+
+        val name = file.name.toString()
+        var ext = ""
+        if(name.lastIndexOf('.') > 0) {
+            ext = name.substring(name.lastIndexOf('.')+1)
+        }
+        when(ext) {
+            "png", "jpg", "jpeg"
+            -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
+        }
+
+        openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
+        openFileIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(openFileIntent)
     }
+    //W/URI: content://com.example.myfile.provider/external_files/Download/photo_2023-02-18_12-14-25.png
+    //W/URI: content://com.example.myfile.provider/external_files/Download/photo_2023-02-18_12-14-25.png
     fun shareFile(file: File){
         val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
+        Log.w("URI", uri.toString())
         val intent = Intent(Intent.ACTION_SEND)
+
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        intent.setType("*/*")
+        intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 
