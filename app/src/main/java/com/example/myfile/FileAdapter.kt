@@ -1,11 +1,15 @@
 package com.example.myfile
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myfile.databinding.ActivityMainBinding
 import com.example.myfile.databinding.ItemFileBinding
 import java.io.File
 import java.util.*
@@ -13,6 +17,7 @@ import java.util.*
 
 interface FileActionListener {
     fun goToFile(file: File)
+    fun clickShare(file: File)
 }
 
 class FileAdapter(private val actionListener: FileActionListener
@@ -44,6 +49,7 @@ class FileAdapter(private val actionListener: FileActionListener
             nameFile.text = file?.name
             val lastModified = Date(file!!.lastModified())
             dateCreateFile.text = lastModified.toString()
+            buttonShare.setImageResource(R.drawable.icon_share)
             sizeFile.text = "${ file.length() / (1024) }" + " kb"
 
             val name = file.name.toString()
@@ -69,19 +75,18 @@ class FileAdapter(private val actionListener: FileActionListener
                     photoImageView.setImageResource(R.drawable.icon_folder)
                     sizeFile.text = "эл-ов:" + count.toString()
                 }
-
-
-
             }
 
-
+            buttonShare.setOnClickListener {
+                actionListener.clickShare(file)
+            }
         }
     }
 
     override fun getItemCount(): Int = files.size
 
     override fun onClick(v: View) {
-        val chat = v.tag as File
-        actionListener.goToFile(chat)
+        val file = v.tag as File
+        actionListener.goToFile(file)
     }
 }

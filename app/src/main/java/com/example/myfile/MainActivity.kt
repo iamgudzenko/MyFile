@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity(), IGetFileView {
         checkermission()
         adapter = FileAdapter(object : FileActionListener {
             override fun goToFile(file: File) {
+
                 binding.textInfo.visibility = View.GONE
                 currentFile = file
                 val name = file.name.toString()
@@ -50,22 +51,24 @@ class MainActivity : AppCompatActivity(), IGetFileView {
                     path = Environment.getExternalStorageDirectory().toString() + "/${file.name}"
                     getFilePresenter.getFileSLoading(file.path)
                 } else {
-                    val URI: Uri = FileProvider.getUriForFile(
-                        this@MainActivity,
-                        BuildConfig.APPLICATION_ID + ".provider",
-                        file
-                    )
-                    Log.w("URI", URI.toString())
-                    val intent =
-                        Intent(Intent.ACTION_VIEW, URI)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivity(intent)
+//                    val URI: Uri = FileProvider.getUriForFile(
+//                        this@MainActivity,
+//                        BuildConfig.APPLICATION_ID + ".provider",
+//                        file
+//                    )
+//                    Log.w("URI", URI.toString())
+//                    val intent =
+//                        Intent(Intent.ACTION_VIEW, URI)
+//                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                    startActivity(intent)
+                    openFile(file)
                 }
-//                fileList.clear()
-//                binding.recyclerViewFile.removeAllViews()
-//                path = Environment.getExternalStorageDirectory().toString() + "/${file.name}"
-//                getFilePresenter.getFileSLoading(file.path)
             }
+
+            override fun clickShare(file: File) {
+                shareFile(file)
+            }
+
         })
         getFilePresenter.getFileSLoading(Environment.getExternalStorageDirectory().toString())
 
@@ -83,13 +86,22 @@ class MainActivity : AppCompatActivity(), IGetFileView {
 
         }
     }
+    @SuppressLint("IntentReset")
+    fun openFile(file:File) {
+        val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.type = "*/*"
+        startActivity(intent)
+    }
     fun shareFile(file: File){
         val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
         val intent = Intent(Intent.ACTION_SEND)
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         intent.setType("*/*")
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 
