@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <ImageView
+        android:id="@+id/photoImageView"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="6dp"
+        tools:src="@drawable/icon_simple_file"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/nameFile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/sizeFile"
+        app:layout_constraintStart_toEndOf="@id/photoImageView"
+        app:layout_constraintTop_toTopOf="@id/photoImageView"
+        tools:text="Login" />
+
+    <TextView
+        android:id="@+id/dateCreateFile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="end"
+        android:paddingRight="10dp"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        tools:text="01.01.2023"
+        app:layout_constraintTop_toBottomOf="@id/nameFile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/nameFile" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:id="@+id/sizeFile"
+        android:text="275 kb"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/dateCreateFile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </TextView>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonShare"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/sizeFile"
+        tools:src="@drawable/icon_share"
+        android:background="@color/white">
+
+    </ImageButton>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="photoImageView,dateCreateFile"
+        app:barrierDirection="bottom"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
