@@ -1,6 +1,7 @@
 package com.example.myfile
 
 import android.Manifest
+import android.R
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +9,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,19 +23,52 @@ import java.io.File
 @SuppressLint("StaticFieldLeak")
 private lateinit var binding: ActivityMainBinding
 private lateinit var adapter: FileAdapter
+private var sortingBy = true
 lateinit var getFilePresenter: IGetFilePresenter
 var path = ""
 var currentFile: File? = null
 var fileList: MutableList<File> = mutableListOf()
+private var spinerrText = arrayOf("Дата", "Имя", "Тип", "Размер")
 
 @Suppress("DEPRECATED_IDENTITY_EQUALS")
 class MainActivity : AppCompatActivity(), IGetFileView {
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         getFilePresenter = GetFilePresenter(this)
         checkermission()
+
+        val adapterSpinner: ArrayAdapter<String> = ArrayAdapter(this, R.layout.simple_spinner_item, spinerrText)
+        adapterSpinner.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        binding.spinner.adapter = adapterSpinner
+
+
+        val itemSelectedListener: AdapterView.OnItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    val item = parent.getItemAtPosition(position) as String
+                    if (item == spinerrText[0]) {
+                        sortingFile(0)
+                    } else if (item == spinerrText[1]) {
+                        sortingFile(1)
+                    } else if( item == spinerrText[2]) {
+                        sortingFile(2)
+                    } else if(item == spinerrText[3]) {
+                        sortingFile(3)
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        binding.spinner.onItemSelectedListener = itemSelectedListener
+
         adapter = FileAdapter(object : FileActionListener {
             override fun goToFile(file: File) {
 
@@ -74,6 +110,34 @@ class MainActivity : AppCompatActivity(), IGetFileView {
             }
 
         }
+
+        binding.buttonSorting.setOnClickListener {
+            sortingBy = !sortingBy
+            if(sortingBy) {
+                binding.buttonSorting.text = "↓"
+            } else {
+                binding.buttonSorting.text = "↑"
+            }
+
+            binding.recyclerViewFile.removeAllViews()
+            fileList.reverse()
+            adapter.files = fileList.toList()
+            val layoutManager = LinearLayoutManager(this)
+            binding.recyclerViewFile.layoutManager = layoutManager
+            binding.recyclerViewFile.adapter = adapter
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    fun fileType(file: File): String {
+        val name = file.name.toString()
+        var ext = ""
+        if(name.lastIndexOf('.') > 0) {
+            if(file.isFile) {
+                ext = name.substring(name.lastIndexOf('.')+1)
+            }
+        }
+        return ext
     }
 
     fun openFile(file:File) {
@@ -92,20 +156,24 @@ class MainActivity : AppCompatActivity(), IGetFileView {
         when(ext) {
             "png", "jpg", "jpeg"
             -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
+            "pdf"
+            -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "application/pdf")
+            "txt"
+            -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "text/plain")
+            else
+            -> openFileIntent.setDataAndTypeAndNormalize(contentUri, "*/*")
 
         }
 
-        openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
+//        openFileIntent.setDataAndTypeAndNormalize(contentUri, "image/*")
         openFileIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(openFileIntent)
     }
-    //W/URI: content://com.example.myfile.provider/external_files/Download/photo_2023-02-18_12-14-25.png
-    //W/URI: content://com.example.myfile.provider/external_files/Download/photo_2023-02-18_12-14-25.png
+
     fun shareFile(file: File){
         val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
         Log.w("URI", uri.toString())
         val intent = Intent(Intent.ACTION_SEND)
-
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_STREAM, uri)
@@ -150,7 +218,6 @@ class MainActivity : AppCompatActivity(), IGetFileView {
     @SuppressLint("NotifyDataSetChanged")
     override fun getFileView(file: File) {
         fileList.add(file)
-        Log.w("GETFILES", file.name)
         adapter.files = fileList.toList()
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerViewFile.layoutManager = layoutManager
@@ -164,6 +231,26 @@ class MainActivity : AppCompatActivity(), IGetFileView {
         binding.recyclerViewFile.removeAllViews()
         binding.recyclerViewFile.visibility = View.GONE
         binding.textInfo.visibility = View.VISIBLE
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun sortingFile(param: Int) {
+        binding.recyclerViewFile.removeAllViews()
+        if(param == 0) {
+            fileList.sortBy { it.lastModified() }
+        } else if(param == 1) {
+            fileList.sortBy { it.name }
+        } else if(param == 2) {
+            fileList.sortBy { fileType(it) }
+        } else if(param == 3) {
+            fileList.sortBy { it.length() }
+        }
+
+        adapter.files = fileList.toList()
+        val layoutManager = LinearLayoutManager(this)
+        binding.recyclerViewFile.layoutManager = layoutManager
+        binding.recyclerViewFile.adapter = adapter
+        adapter.notifyDataSetChanged()
     }
 
 }

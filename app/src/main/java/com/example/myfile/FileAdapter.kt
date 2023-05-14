@@ -42,7 +42,7 @@ class FileAdapter(private val actionListener: FileActionListener
         return FileViewHolder(binding)
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "SimpleDateFormat")
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
         val file = files[position]
         with(holder.binding) {
@@ -73,11 +73,15 @@ class FileAdapter(private val actionListener: FileActionListener
                     photoImageView.setImageResource(R.drawable.icon_fb)
                 "mp3" ->
                     photoImageView.setImageResource(R.drawable.icon_mp)
+                "pdf" ->
+                    photoImageView.setImageResource(R.drawable.icon_pdf)
                 "" -> {
                     var count = file.listFiles().size ?: 0
                     photoImageView.setImageResource(R.drawable.icon_folder)
                     sizeFile.text = "эл-ов:" + count.toString()
                 }
+                else ->
+                    photoImageView.setImageResource(R.drawable.icon_simple_file)
             }
 
             buttonShare.setOnClickListener {
